@@ -1,218 +1,372 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <style>
-    :root { 
-      --utme-blue: #003366; 
-      --utme-accent: #0056b3;
-      --utme-green: #2e7d32; 
-      --bg-light: #f8f9fa;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-Maths Physics Diagnostic CBT</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
-    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-light); margin: 0; user-select: none; color: #333; }
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg: #f8fafc;
+        }
 
-    /* MOBILE RESPONSIVE ADAPTATION */
-    @media (max-width: 768px) {
-      .container { flex-direction: column !important; padding: 10px !important; }
-      .welcome-card { padding: 20px !important; width: 90% !important; }
-      .header { padding: 10px !important; font-size: 14px; }
-      #timer { font-size: 16px !important; }
-      .question-area { padding: 20px !important; }
-      .navigation-area { width: 100% !important; box-sizing: border-box; }
-      .num-grid { grid-template-columns: repeat(8, 1fr) !important; } /* More columns for phone bottom bar */
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-    #instructions { 
-      position: fixed; inset: 0; 
-      background: linear-gradient(135deg, var(--utme-blue) 0%, #001a33 100%); 
-      z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 20px;
-    }
+        .container {
+            background: white;
+            width: 95%;
+            max-width: 800px;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
 
-    .welcome-card {
-      background: white; width: 100%; max-width: 600px; padding: 40px; border-radius: 15px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center;
-    }
+        /* Landing Page */
+        #landing-page, #quiz-page, #result-page {
+            display: none;
+        }
 
-    .exam-details { display: flex; justify-content: space-around; background: #f0f4f8; padding: 15px; border-radius: 10px; margin: 20px 0; }
-    .detail-item { display: flex; flex-direction: column; }
-    .detail-label { font-size: 10px; color: #666; text-transform: uppercase; }
-    .detail-value { font-weight: bold; font-size: 16px; color: var(--utme-blue); }
+        .active { display: block !important; }
 
-    .warning-box { background: #fff5f5; border-left: 4px solid #f56565; padding: 12px; margin: 20px 0; text-align: left; font-size: 13px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
 
-    .start-btn { 
-      width: 100%; padding: 16px; background: var(--utme-green); color: white; 
-      border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; 
-    }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
 
-    .header { background: var(--utme-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-    #timer { font-family: monospace; font-size: 22px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 5px; }
+        /* Quiz UI */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
 
-    .container { display: flex; padding: 25px; gap: 25px; max-width: 1200px; margin: 0 auto; }
-    .question-area { flex: 3; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 300px; }
-    .navigation-area { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    
-    .num-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 20px; }
-    .num-btn { padding: 10px 2px; border: 1px solid #dee2e6; text-align:center; cursor: pointer; background: #f8f9fa; border-radius: 4px; font-size: 12px; }
-    .num-btn.answered { background: var(--utme-green); color: white; border-color: var(--utme-green); }
-    .num-btn.active { border: 2px solid var(--utme-blue); color: var(--utme-blue); }
-    
-    .btn-group { margin-top: 30px; display: flex; gap: 10px; }
-    .btn-nav { padding: 12px 15px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: 600; flex: 1; }
-    .btn-next { background: var(--utme-blue); color: white; border: none; }
-  </style>
+        .warning { color: var(--danger); font-size: 0.8rem; font-weight: bold; }
+
+        .option {
+            display: block;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover { border-color: var(--primary); background: #eff6ff; }
+        input[type="radio"] { width: auto; margin-right: 10px; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+        }
+    </style>
 </head>
 <body>
 
-  <div id="instructions">
-    <div class="welcome-card">
-      <h1>D-MATHS EXAM</h1>
-      <div class="exam-details">
-        <div class="detail-item"><span class="detail-label">Items</span><span class="detail-value">40</span></div>
-        <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">40m</span></div>
-        <div class="detail-item"><span class="detail-label">Subject</span><span class="detail-value">Physics</span></div>
-      </div>
-      <div class="warning-box">
-        <strong>SECURITY:</strong> Auto-submit after 5 tab switches.
-      </div>
-      <button class="start-btn" onclick="startExam()">START TEST</button>
-    </div>
-  </div>
-
-  <div class="header">
-    <div><strong>D-MATHS CBT</strong></div>
-    <div id="timer">40:00</div>
-    <button onclick="submitExam()" style="background: #c53030; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Submit</button>
-  </div>
-
-  <div class="container">
-    <div class="question-area" id="quiz-box">
-      <h3 id="q-text" style="font-size: 18px;">Fetching Questions...</h3>
-      <div id="options-list"></div>
-      <div class="btn-group">
-        <button class="btn-nav" onclick="prevQ()">Back</button>
-        <button class="btn-nav btn-next" onclick="nextQ()">Next</button>
-      </div>
+<div class="container">
+    <div id="landing-page" class="active">
+        <h2 style="text-align: center;">Physics Diagnostic CBT</h2>
+        <p style="text-align: center; color: #64748b;">Enter details to begin. 40 Questions | 40 Mins</p>
+        <form id="login-form">
+            <input type="text" id="user-id" placeholder="Student ID" required>
+            <input type="email" id="user-email" placeholder="Email Address" required>
+            <input type="password" id="user-pass" placeholder="Access Password" required>
+            <button type="submit">Start Examination</button>
+        </form>
     </div>
 
-    <div class="navigation-area">
-      <h4 style="margin:0; font-size: 14px;">Navigator</h4>
-      <div id="num-grid" class="num-grid"></div>
+    <div id="quiz-page">
+        <div class="header">
+            <div>Q: <span id="q-count">1</span>/40</div>
+            <div class="warning" id="security-msg">Violations: 0/3</div>
+            <div id="timer">40:00</div>
+        </div>
+        <div id="question-container">
+            <h3 id="question-text">Loading question...</h3>
+            <div id="options-container"></div>
+        </div>
+        <button id="next-btn" style="margin-top: 20px;">Next Question</button>
     </div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let questions = [];
-    let currentIdx = 0;
-    let userAnswers = {};
-    let tabViolations = 0;
-    let timeLeft = 40 * 60;
+    <div id="result-page">
+        <h2 style="text-align: center;">Test Completed</h2>
+        <div id="score-display" style="font-size: 2rem; text-align: center; color: var(--primary); font-weight: bold;"></div>
+        <p style="text-align: center;">Your result is being synced and your PDF is ready.</p>
+        <button onclick="generatePDF()">Download Fancy Result PDF</button>
+        <button onclick="location.reload()" style="background: #64748b;">Return Home</button>
+    </div>
+</div>
 
-    // IMPORTANT: REPLACE THE URL BELOW WITH YOUR DEPLOYED WEB APP URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz1XeMZnKagLi8o8vAG9KeJuR9hfsBvqylli60CE3Sv8zqnXgfpwbNu0CnkVIQfz0c/exec";
+<script>
+    const ALL_QUESTIONS = [
+        { q: "What is the SI unit of force?", a: "Joule", b: "Newton", c: "Watt", d: "Pascal", ans: "B", cat: "Mechanics" },
+        { q: "Which of the following is a scalar quantity?", a: "Velocity", b: "Acceleration", c: "Mass", d: "Displacement", ans: "C", cat: "Mechanics" },
+        { q: "The rate of change of velocity is known as:", a: "Speed", b: "Momentum", c: "Acceleration", d: "Force", ans: "C", cat: "Mechanics" },
+        { q: "What is the formula for kinetic energy?", a: "mgh", b: "1/2 mv^2", c: "F = ma", d: "W = Fd", ans: "B", cat: "Mechanics" },
+        { q: "Newton's third law of motion states that for every action, there is:", a: "An equal and opposite reaction", b: "A proportional acceleration", c: "A change in mass", d: "Zero net force", ans: "A", cat: "Mechanics" },
+        { q: "The tendency of an object to resist changes in its state of motion is called:", a: "Gravity", b: "Friction", c: "Inertia", d: "Momentum", ans: "C", cat: "Mechanics" },
+        { q: "Work is defined as the product of force and:", a: "Time", b: "Distance", c: "Velocity", d: "Mass", ans: "B", cat: "Mechanics" },
+        { q: "What is the weight of a 10 kg object on Earth? (Assuming g = 9.8 m/s^2)", a: "98 N", b: "10 N", c: "9.8 N", d: "980 N", ans: "A", cat: "Mechanics" },
+        { q: "The principle of conservation of momentum applies to:", a: "Only elastic collisions", b: "Only inelastic collisions", c: "All closed system collisions", d: "Objects at rest", ans: "C", cat: "Mechanics" },
+        { q: "Power is defined as:", a: "Force per unit area", b: "Work done per unit time", c: "Energy multiplied by time", d: "Mass times acceleration", ans: "B", cat: "Mechanics" },
+        { q: "Which temperature scale has no negative numbers?", a: "Celsius", b: "Fahrenheit", c: "Kelvin", d: "Rankine", ans: "C", cat: "Thermodynamics" },
+        { q: "Heat transfer by the actual movement of fluid is called:", a: "Conduction", b: "Convection", c: "Radiation", d: "Sublimation", ans: "B", cat: "Thermodynamics" },
+        { q: "The first law of thermodynamics is essentially the law of conservation of:", a: "Energy", b: "Mass", c: "Momentum", d: "Heat", ans: "A", cat: "Thermodynamics" },
+        { q: "Absolute zero is equivalent to:", a: "0 degrees Celsius", b: "-100 degrees Celsius", c: "-273.15 degrees Celsius", d: "32 degrees Fahrenheit", ans: "C", cat: "Thermodynamics" },
+        { q: "The amount of heat required to raise the temperature of 1 kg of a substance by 1 K is its:", a: "Latent heat", b: "Specific heat capacity", c: "Thermal conductivity", d: "Internal energy", ans: "B", cat: "Thermodynamics" },
+        { q: "Sound waves cannot travel through:", a: "Water", b: "Air", c: "Steel", d: "A vacuum", ans: "D", cat: "Waves" },
+        { q: "The distance between two consecutive crests of a wave is its:", a: "Amplitude", b: "Frequency", c: "Wavelength", d: "Period", ans: "C", cat: "Waves" },
+        { q: "The number of wave cycles per second is called:", a: "Wavelength", b: "Velocity", c: "Amplitude", d: "Frequency", ans: "D", cat: "Waves" },
+        { q: "Electromagnetic waves are:", a: "Longitudinal waves", b: "Transverse waves", c: "Mechanical waves", d: "Stationary waves", ans: "B", cat: "Waves" },
+        { q: "Which of the following electromagnetic waves has the highest frequency?", a: "Radio waves", b: "Microwaves", c: "X-rays", d: "Gamma rays", ans: "D", cat: "Waves" },
+        { q: "The bending of light as it passes from one medium to another is called:", a: "Reflection", b: "Refraction", c: "Diffraction", d: "Interference", ans: "B", cat: "Optics" },
+        { q: "A mirror that curves inward like a cave is called a:", a: "Convex mirror", b: "Concave mirror", c: "Plane mirror", d: "Spherical mirror", ans: "B", cat: "Optics" },
+        { q: "Total internal reflection can only occur when light travels from a:", a: "Less dense to a more dense medium", b: "More dense to a less dense medium", c: "Vacuum to a gas", d: "Solid to a solid of the same density", ans: "B", cat: "Optics" },
+        { q: "The splitting of white light into its component colors is known as:", a: "Dispersion", b: "Diffraction", c: "Scattering", d: "Polarization", ans: "A", cat: "Optics" },
+        { q: "Myopia (short-sightedness) can be corrected using a:", a: "Convex lens", b: "Concave lens", c: "Cylindrical lens", d: "Bifocal lens", ans: "B", cat: "Optics" },
+        { q: "The flow of electric charge is called:", a: "Voltage", b: "Resistance", c: "Current", d: "Power", ans: "C", cat: "Electricity" },
+        { q: "What is the unit of electrical resistance?", a: "Volt", b: "Ampere", c: "Ohm", d: "Coulomb", ans: "C", cat: "Electricity" },
+        { q: "Ohm's Law is mathematically expressed as:", a: "V = IR", b: "I = VR", c: "R = VI", d: "P = VI", ans: "A", cat: "Electricity" },
+        { q: "In a series circuit, what remains constant across all components?", a: "Voltage", b: "Resistance", c: "Current", d: "Power", ans: "C", cat: "Electricity" },
+        { q: "Materials that do not allow electric current to flow easily are called:", a: "Conductors", b: "Semiconductors", c: "Insulators", d: "Superconductors", ans: "C", cat: "Electricity" },
+        { q: "Equivalent resistance of two 4 Ohm resistors in parallel is:", a: "8 Ohms", b: "4 Ohms", c: "2 Ohms", d: "1 Ohm", ans: "C", cat: "Electricity" },
+        { q: "The instrument used to measure electric current is an:", a: "Voltmeter", b: "Ammeter", c: "Galvanometer", d: "Ohmmeter", ans: "B", cat: "Electricity" },
+        { q: "Magnetic field lines around a bar magnet travel from:", a: "South to North pole", b: "North to South pole", c: "East to West", d: "Center to edges", ans: "B", cat: "Magnetism" },
+        { q: "A device that converts mechanical energy into electrical energy is a:", a: "Motor", b: "Transformer", c: "Generator", d: "Capacitor", ans: "C", cat: "Magnetism" },
+        { q: "Which rule is used to determine the direction of the magnetic field around a straight current-carrying wire?", a: "Fleming's Left-Hand Rule", b: "Right-Hand Grip Rule", c: "Lenz's Law", d: "Faraday's Law", ans: "B", cat: "Magnetism" },
+        { q: "A transformer is used to:", a: "Convert AC to DC", b: "Convert DC to AC", c: "Step up or step down AC voltage", d: "Store electrical energy", ans: "C", cat: "Magnetism" },
+        { q: "The concept that light travels in discrete packets of energy is central to:", a: "Wave theory", b: "Quantum theory", c: "Relativity", d: "Electromagnetism", ans: "B", cat: "Modern Physics" },
+        { q: "These packets of light energy are called:", a: "Electrons", b: "Protons", c: "Photons", d: "Neutrinos", ans: "C", cat: "Modern Physics" },
+        { q: "Einstein's famous equation E=mc^2 relates energy to:", a: "Momentum", b: "Mass", c: "Velocity", d: "Charge", ans: "B", cat: "Modern Physics" },
+        { q: "The emission of electrons from a metal surface when light shines on it is the:", a: "Compton effect", b: "Photoelectric effect", c: "Zeeman effect", d: "Doppler effect", ans: "B", cat: "Modern Physics" },
+        { q: "The nucleus of an atom contains:", a: "Protons and electrons", b: "Neutrons and electrons", c: "Protons and neutrons", d: "Only protons", ans: "C", cat: "Nuclear Physics" },
+        { q: "Isotopes are atoms of the same element with different numbers of:", a: "Protons", b: "Electrons", c: "Neutrons", d: "Positrons", ans: "C", cat: "Nuclear Physics" },
+        { q: "Alpha particles are essentially nuclei of:", a: "Hydrogen", b: "Helium", c: "Carbon", d: "Oxygen", ans: "B", cat: "Nuclear Physics" },
+        { q: "Which type of radiation is the most penetrating?", a: "Alpha", b: "Beta", c: "Gamma", d: "Neutron", ans: "C", cat: "Nuclear Physics" },
+        { q: "The time required for half the atoms in a radioactive sample to decay is called its:", a: "Decay constant", b: "Mean life", c: "Half-life", d: "Active time", ans: "C", cat: "Nuclear Physics" },
+        { q: "Pressure in a fluid at rest depends on:", a: "Depth and density", b: "Volume and mass", c: "Shape of the container", d: "Surface area only", ans: "A", cat: "Fluid Mechanics" },
+        { q: "The upward force exerted by a fluid on a submerged object is called:", a: "Tension", b: "Upthrust (Buoyancy)", c: "Drag", d: "Friction", ans: "B", cat: "Fluid Mechanics" },
+        { q: "Pascal's principle is the working basis of:", a: "Airplanes", b: "Hydraulic presses", c: "Thermometers", d: "Barometers", ans: "B", cat: "Fluid Mechanics" },
+        { q: "The equation of continuity for fluids states that the product of cross-sectional area and velocity is:", a: "Zero", b: "Constant", c: "Increasing", d: "Decreasing", ans: "B", cat: "Fluid Mechanics" },
+        { q: "Bernoulli's principle states that as the speed of a fluid increases, its pressure:", a: "Increases", b: "Decreases", c: "Stays the same", d: "Fluctuates", ans: "B", cat: "Fluid Mechanics" },
+        { q: "If a car travels 100 meters in 5 seconds at a constant velocity, what is its speed?", a: "20 m/s", b: "500 m/s", c: "105 m/s", d: "95 m/s", ans: "A", cat: "Kinematics" },
+        { q: "The slope of a velocity-time graph represents:", a: "Displacement", b: "Speed", c: "Acceleration", d: "Jerk", ans: "C", cat: "Kinematics" },
+        { q: "The area under a velocity-time graph represents:", a: "Acceleration", b: "Force", c: "Displacement", d: "Momentum", ans: "C", cat: "Kinematics" },
+        { q: "An object dropped from rest falls for 3 seconds. What is its velocity? (g = 10 m/s^2)", a: "10 m/s", b: "15 m/s", c: "30 m/s", d: "45 m/s", ans: "C", cat: "Kinematics" },
+        { q: "Friction always acts in a direction:", a: "Parallel to the motion", b: "Perpendicular to the motion", c: "Opposite to the relative motion", d: "Downward", ans: "C", cat: "Dynamics" },
+        { q: "The coefficient of static friction is generally:", a: "Less than the kinetic friction", b: "Greater than the kinetic friction", c: "Equal to the kinetic friction", d: "Zero", ans: "B", cat: "Dynamics" },
+        { q: "The force required to keep an object moving in a circular path is called:", a: "Centrifugal force", b: "Centripetal force", c: "Gravitational force", d: "Tension", ans: "B", cat: "Circular Motion" },
+        { q: "If the radius of a circular path is doubled while speed remains constant, the centripetal acceleration:", a: "Doubles", b: "Halves", c: "Quadruples", d: "Stays the same", ans: "B", cat: "Circular Motion" },
+        { q: "Newton's law of universal gravitation states that force is inversely proportional to the:", a: "Product of masses", b: "Distance between objects", c: "Square of the distance between objects", d: "Sum of the masses", ans: "C", cat: "Gravitation" },
+        { q: "The value of acceleration due to gravity (g) at the center of the Earth is:", a: "9.8 m/s^2", b: "Infinity", c: "Zero", d: "4.9 m/s^2", ans: "C", cat: "Gravitation" },
+        { q: "A 2 kg mass is lifted 5 meters vertically. What is the potential energy gained? (g = 10 m/s^2)", a: "10 J", b: "50 J", c: "100 J", d: "200 J", ans: "C", cat: "Work and Energy" },
+        { q: "Mechanical energy is the sum of:", a: "Heat and light energy", b: "Kinetic and potential energy", c: "Chemical and nuclear energy", d: "Work and power", ans: "B", cat: "Work and Energy" },
+        { q: "A spring compressed by distance x stores elastic potential energy proportional to:", a: "x", b: "x^2", c: "1/x", d: "sqrt(x)", ans: "B", cat: "Work and Energy" },
+        { q: "Hooke's Law states that extension is directly proportional to applied force, provided:", a: "The elastic limit is not exceeded", b: "The material is a metal", c: "The temperature is zero", d: "The force is minimal", ans: "A", cat: "Properties of Matter" },
+        { q: "Stress is defined as:", a: "Force / Area", b: "Change in length / Original length", c: "Mass / Volume", d: "Force * Area", ans: "A", cat: "Properties of Matter" },
+        { q: "The ratio of stress to strain is known as:", a: "Poisson's ratio", b: "Young's modulus", c: "Bulk modulus", d: "Shear modulus", ans: "B", cat: "Properties of Matter" },
+        { q: "In an isothermal process, which property remains constant?", a: "Pressure", b: "Volume", c: "Temperature", d: "Heat", ans: "C", cat: "Thermodynamics" },
+        { q: "An adiabatic process is one in which there is no exchange of:", a: "Temperature", b: "Pressure", c: "Heat", d: "Work", ans: "C", cat: "Thermodynamics" },
+        { q: "The apparent change in frequency of sound due to relative motion is called the:", a: "Compton effect", b: "Doppler effect", c: "Faraday effect", d: "Photoelectric effect", ans: "B", cat: "Waves" },
+        { q: "If the tension in a stretched string is increased, the speed of the wave:", a: "Increases", b: "Decreases", c: "Stays the same", d: "Becomes zero", ans: "A", cat: "Waves" },
+        { q: "The primary colors of light are:", a: "Red, Yellow, Blue", b: "Red, Green, Blue", c: "Cyan, Magenta, Yellow", d: "Black and White", ans: "B", cat: "Optics" },
+        { q: "An object placed at the focal point of a concave mirror will produce an image at:", a: "The center of curvature", b: "The pole", c: "Infinity", d: "The focal point itself", ans: "C", cat: "Optics" },
+        { q: "Coulomb's law describes the force between:", a: "Masses", b: "Magnets", c: "Electric charges", d: "Currents", ans: "C", cat: "Electricity" },
+        { q: "The electric field inside a hollow metallic conductor is:", a: "Uniform", b: "Zero", c: "Maximum at the center", d: "Variable", ans: "B", cat: "Electricity" },
+        { q: "Capacitance is measured in:", a: "Henries", b: "Ohms", c: "Farads", d: "Teslas", ans: "C", cat: "Electricity" },
+        { q: "A device used to store electrical charge is called a:", a: "Resistor", b: "Inductor", c: "Diode", d: "Capacitor", ans: "D", cat: "Electricity" },
+        { q: "The unit of magnetic flux density is the:", a: "Weber", b: "Tesla", c: "Gauss", d: "Oersted", ans: "B", cat: "Magnetism" },
+        { q: "Materials that are strongly attracted by magnets are called:", a: "Diamagnetic", b: "Paramagnetic", c: "Ferromagnetic", d: "Non-magnetic", ans: "C", cat: "Magnetism" },
+        { q: "In an AC circuit containing only a pure inductor, the current:", a: "Leads the voltage by 90 degrees", b: "Lags the voltage by 90 degrees", c: "Is in phase with voltage", d: "Is zero", ans: "B", cat: "AC Circuits" },
+        { q: "The opposition to current flow in an AC circuit caused by capacitors and inductors is called:", a: "Resistance", b: "Impedance", c: "Reactance", d: "Admittance", ans: "C", cat: "AC Circuits" },
+        { q: "A semiconductor doped with pentavalent impurities becomes an:", a: "P-type semiconductor", b: "N-type semiconductor", c: "Intrinsic semiconductor", d: "Insulator", ans: "B", cat: "Electronics" },
+        { q: "A PN junction diode primarily allows current to flow in:", a: "Both directions equally", b: "Only one direction", c: "No direction", d: "Alternating directions", ans: "B", cat: "Electronics" },
+        { q: "The process of converting AC to DC is called:", a: "Amplification", b: "Modulation", c: "Rectification", d: "Oscillation", ans: "C", cat: "Electronics" },
+        { q: "The wave-particle duality of matter was proposed by:", a: "Niels Bohr", b: "Max Planck", c: "Louis de Broglie", d: "Albert Einstein", ans: "C", cat: "Modern Physics" },
+        { q: "Heisenberg's Uncertainty Principle states we cannot precisely know both the position and the:", a: "Energy", b: "Mass", c: "Time", d: "Momentum", ans: "D", cat: "Modern Physics" },
+        { q: "According to Special Relativity, the speed of light in a vacuum is:", a: "Relative to the observer", b: "Constant for all observers", c: "Infinite", d: "Dependent on the light source", ans: "B", cat: "Modern Physics" },
+        { q: "The splitting of a heavy nucleus into two lighter nuclei is called:", a: "Fusion", b: "Fission", c: "Alpha decay", d: "Transmutation", ans: "B", cat: "Nuclear Physics" },
+        { q: "In nuclear fusion, mass is converted into energy according to which equation?", a: "F=ma", b: "V=IR", c: "E=mc^2", d: "W=Fd", ans: "C", cat: "Nuclear Physics" },
+        { q: "The distance light travels in one year is called a:", a: "Parsec", b: "Astronomical Unit", c: "Light-year", d: "Megameter", ans: "C", cat: "Astrophysics" },
+        { q: "The expansion of the universe is supported by the observation of:", a: "Blue shift of galaxies", b: "Red shift of galaxies", c: "Pulsars", d: "Solar eclipses", ans: "B", cat: "Astrophysics" },
+        { q: "What is the center of gravity?", a: "The geometric center", b: "The point where total mass is concentrated", c: "The point where weight appears to act", d: "The heaviest part of an object", ans: "C", cat: "Mechanics" },
+        { q: "A lever where the fulcrum is between the load and the effort is a:", a: "First-class lever", b: "Second-class lever", c: "Third-class lever", d: "Fourth-class lever", ans: "A", cat: "Mechanics" },
+        { q: "The energy required to change a substance from liquid to gas without a temperature change is:", a: "Specific heat", b: "Latent heat of fusion", c: "Latent heat of vaporization", d: "Thermal capacity", ans: "C", cat: "Thermodynamics" },
+        { q: "Interference of light waves provides evidence for the:", a: "Particle nature of light", b: "Wave nature of light", c: "Electromagnetic spectrum", d: "Speed of light", ans: "B", cat: "Waves" },
+        { q: "A magnifying glass typically uses a:", a: "Biconvex lens", b: "Biconcave lens", c: "Plano-concave lens", d: "Cylindrical lens", ans: "A", cat: "Optics" },
+        { q: "Which material is the best conductor of electricity at room temperature?", a: "Gold", b: "Copper", c: "Silver", d: "Aluminum", ans: "C", cat: "Electricity" },
+        { q: "The Earth's magnetic north pole is geographically close to its:", a: "Geographic North Pole", b: "Geographic South Pole", c: "Equator", d: "Prime Meridian", ans: "B", cat: "Magnetism" },
+        { q: "A transistor is primarily used as an:", a: "Inductor", b: "Amplifier or switch", c: "Resistor", d: "Battery", ans: "B", cat: "Electronics" },
+        { q: "Rutherford's gold foil experiment proved the existence of the:", a: "Electron", b: "Proton", c: "Nucleus", d: "Neutron", ans: "C", cat: "Modern Physics" },
+        { q: "A micrometer screw gauge is used to measure:", a: "Large distances", b: "Very small diameters or thicknesses", c: "Mass", d: "Time intervals", ans: "B", cat: "Measurement" }
+    ];
 
-    async function startExam() {
-      document.getElementById('instructions').style.display = 'none';
-      try {
-        const response = await fetch(WEB_APP_URL + "?getQuestions=true");
-        questions = await response.json();
-        renderQuestion();
-        renderGrid();
-        startTimer();
-      } catch (e) {
-        alert("Error loading questions. Ensure you pasted the correct Web App URL in the code.");
-        console.error(e);
-      }
-    }
+    let selectedQuestions = [];
+    let currentIndex = 0;
+    let userAnswers = [];
+    let violations = 0;
+    let timerInterval;
+    let userData = {};
 
-    // Security and Navigation logic remains exactly the same
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        tabViolations++;
-        alert(`Warning! Violations: ${tabViolations}/5`);
-        if (tabViolations >= 5) submitExam();
-      }
+    const loginForm = document.getElementById('login-form');
+    
+    // START TEST
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        userData = {
+            id: document.getElementById('user-id').value,
+            email: document.getElementById('user-email').value
+        };
+        
+        // Shuffle and select 40
+        selectedQuestions = ALL_QUESTIONS.sort(() => 0.5 - Math.random()).slice(0, 40);
+        
+        document.getElementById('landing-page').classList.remove('active');
+        document.getElementById('quiz-page').classList.add('active');
+        
+        startTimer(40 * 60);
+        showQuestion();
+        setupSecurity();
     });
 
-    function renderQuestion() {
-      if(!questions[currentIdx]) return;
-      const q = questions[currentIdx];
-      document.getElementById('q-text').innerText = `Q${currentIdx + 1}: ${q.question}`;
-      let html = "";
-      q.options.forEach((opt, i) => {
-        const letter = String.fromCharCode(65 + i);
-        const checked = userAnswers[currentIdx] === letter ? 'checked' : '';
-        html += `<div style="margin-bottom: 10px; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fafafa">
-                  <label style="display: block; cursor: pointer;">
-                    <input type="radio" name="opt" value="${letter}" ${checked} onchange="saveAnswer('${letter}')"> 
-                    <strong>${letter}.</strong> ${opt}
-                  </label>
-                </div>`;
-      });
-      document.getElementById('options-list').innerHTML = html;
+    function showQuestion() {
+        const q = selectedQuestions[currentIndex];
+        document.getElementById('q-count').innerText = currentIndex + 1;
+        document.getElementById('question-text').innerText = q.q;
+        const optionsDiv = document.getElementById('options-container');
+        optionsDiv.innerHTML = `
+            <label class="option"><input type="radio" name="quiz" value="A"> ${q.a}</label>
+            <label class="option"><input type="radio" name="quiz" value="B"> ${q.b}</label>
+            <label class="option"><input type="radio" name="quiz" value="C"> ${q.c}</label>
+            <label class="option"><input type="radio" name="quiz" value="D"> ${q.d}</label>
+        `;
     }
 
-    function saveAnswer(val) { userAnswers[currentIdx] = val; renderGrid(); }
-    function renderGrid() {
-      let html = "";
-      questions.forEach((_, i) => {
-        let status = userAnswers[i] ? 'answered' : '';
-        let active = currentIdx === i ? 'active' : '';
-        html += `<div class="num-btn ${status} ${active}" onclick="goToQ(${i})">${i + 1}</div>`;
-      });
-      document.getElementById('num-grid').innerHTML = html;
+    document.getElementById('next-btn').addEventListener('click', () => {
+        const selected = document.querySelector('input[name="quiz"]:checked');
+        if (!selected) return alert("Please select an answer");
+
+        userAnswers.push({
+            question: selectedQuestions[currentIndex].q,
+            correct: selectedQuestions[currentIndex].ans,
+            user: selected.value,
+            isRight: selected.value === selectedQuestions[currentIndex].ans
+        });
+
+        currentIndex++;
+        if (currentIndex < 40) {
+            showQuestion();
+        } else {
+            endTest();
+        }
+    });
+
+    // SECURITY SYSTEM
+    function setupSecurity() {
+        window.onblur = () => {
+            violations++;
+            document.getElementById('security-msg').innerText = `Violations: ${violations}/3`;
+            if (violations >= 3) {
+                alert("Security Violation: Multiple tab switches. Test will auto-submit.");
+                endTest();
+            }
+        };
     }
 
-    function goToQ(i) { currentIdx = i; renderQuestion(); renderGrid(); }
-    function nextQ() { if(currentIdx < 39) goToQ(currentIdx + 1); }
-    function prevQ() { if(currentIdx > 0) goToQ(currentIdx - 1); }
-
-    function startTimer() {
-      const interval = setInterval(() => {
-        if (timeLeft <= 0) { clearInterval(interval); submitExam(); }
-        timeLeft--;
-        let mins = Math.floor(timeLeft / 60);
-        let secs = timeLeft % 60;
-        document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      }, 1000);
+    function startTimer(duration) {
+        let timer = duration, minutes, seconds;
+        timerInterval = setInterval(() => {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+            document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+            if (--timer < 0) endTest();
+        }, 1000);
     }
 
-    function submitExam() {
-      let score = 0;
-      questions.forEach((q, i) => { if (userAnswers[i] === q.answer) score++; });
-      generatePDF(score);
-      alert("Submitted!");
-      window.location.reload();
+    function endTest() {
+        clearInterval(timerInterval);
+        window.onblur = null;
+        document.getElementById('quiz-page').classList.remove('active');
+        document.getElementById('result-page').classList.add('active');
+        
+        const score = userAnswers.filter(a => a.isRight).length;
+        document.getElementById('score-display').innerText = `${score} / 40`;
+        
+        syncWithGoogleSheets(score);
     }
 
-    function generatePDF(score) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("D-MATHS DIAGNOSING EXAM RESULT", 20, 20);
-      doc.text(`Score: ${score} / 40`, 20, 40);
-      doc.save("D-MATHS-Result.pdf");
+    // PDF GENERATION
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(20);
+        doc.text("D-Maths Physics Diagnostic Report", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Student ID: ${userData.id}`, 20, 30);
+        doc.text(`Email: ${userData.email}`, 20, 37);
+        doc.text(`Final Score: ${userAnswers.filter(a => a.isRight).length}/40`, 20, 44);
+
+        const tableData = userAnswers.map((u, i) => [
+            i + 1,
+            u.question.substring(0, 50) + "...",
+            u.correct,
+            u.user,
+            u.isRight ? "CORRECT" : "WRONG"
+        ]);
+
+        doc.autoTable({
+            startY: 50,
+            head: [['#', 'Question', 'Key', 'Your Ans', 'Status']],
+            body: tableData,
+            headStyles: { fillStyle: [37, 99, 235] }
+        });
+
+        doc.save(`Physics_Result_${userData.id}.pdf`);
     }
 
-    async function submitExam() {
-  let score = 0;
-  questions.forEach((q, i) => {
-    if (userAnswers[i] === q.answer) score++;
-  });
-
-  // 1. Send score to Google Sheet
-  try {
-    await fetch(WEB_APP_URL + "?score=" + score);
-  } catch (e) {
-    console.log("Could not record score to sheet, but downloading PDF anyway.");
-  }
-
-  // 2. Download the Result PDF
-  generatePDF(score);
-
-  alert("Exam Submitted Successfully! Your result is downloading.");
-  window.location.reload();
-}
-  </script>
+    // GOOGLE SHEETS LINKING (CONCEPTUAL)
+    function syncWithGoogleSheets(score) {
+        // You would create a Google Apps Script Web App and put the URL here
+        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxNxAxn33X2X2Ower3vkkmNAl_8J279iH02C4uZ6umYZbvNk4-Z6i-I6opxytuY_RMn/exec';
+        fetch(WEBHOOK_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ ...userData, score: score, date: new Date() })
+        }).catch(err => console.log("External sync failed. Using local storage."));
+    }
+</script>
 </body>
 </html>
