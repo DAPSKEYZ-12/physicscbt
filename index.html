@@ -11,195 +11,149 @@
     
     body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-light); margin: 0; user-select: none; color: #333; }
 
-    /* MODERN WELCOME SCREEN */
+    /* MOBILE RESPONSIVE ADAPTATION */
+    @media (max-width: 768px) {
+      .container { flex-direction: column !important; padding: 10px !important; }
+      .welcome-card { padding: 20px !important; width: 90% !important; }
+      .header { padding: 10px !important; font-size: 14px; }
+      #timer { font-size: 16px !important; }
+      .question-area { padding: 20px !important; }
+      .navigation-area { width: 100% !important; box-sizing: border-box; }
+      .num-grid { grid-template-columns: repeat(8, 1fr) !important; } /* More columns for phone bottom bar */
+    }
+
     #instructions { 
-      position: fixed; 
-      inset: 0; 
+      position: fixed; inset: 0; 
       background: linear-gradient(135deg, var(--utme-blue) 0%, #001a33 100%); 
-      z-index: 1000; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center;
-      padding: 20px;
+      z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 20px;
     }
 
     .welcome-card {
-      background: white;
-      width: 100%;
-      max-width: 600px;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      text-align: center;
-      animation: fadeIn 0.5s ease-out;
+      background: white; width: 100%; max-width: 600px; padding: 40px; border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center;
     }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    .welcome-card h1 { color: var(--utme-blue); margin-bottom: 10px; font-size: 28px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-    
     .exam-details { display: flex; justify-content: space-around; background: #f0f4f8; padding: 15px; border-radius: 10px; margin: 20px 0; }
     .detail-item { display: flex; flex-direction: column; }
-    .detail-label { font-size: 12px; color: #666; text-transform: uppercase; }
-    .detail-value { font-weight: bold; font-size: 18px; color: var(--utme-blue); }
+    .detail-label { font-size: 10px; color: #666; text-transform: uppercase; }
+    .detail-value { font-weight: bold; font-size: 16px; color: var(--utme-blue); }
 
-    .instruction-list { text-align: left; margin: 20px 0; line-height: 1.6; font-size: 14px; }
-    .instruction-list li { margin-bottom: 10px; color: #444; }
-
-    .warning-box { 
-      background: #fff5f5; 
-      border-left: 4px solid #f56565; 
-      padding: 12px; 
-      margin: 20px 0; 
-      text-align: left;
-    }
+    .warning-box { background: #fff5f5; border-left: 4px solid #f56565; padding: 12px; margin: 20px 0; text-align: left; font-size: 13px; }
 
     .start-btn { 
-      width: 100%;
-      padding: 16px; 
-      background: var(--utme-green); 
-      color: white; 
-      border: none; 
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer; 
-      transition: background 0.3s;
-      box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+      width: 100%; padding: 16px; background: var(--utme-green); color: white; 
+      border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; 
     }
-    .start-btn:hover { background: #246328; }
 
-    /* Header & Timer */
-    .header { background: var(--utme-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { background: var(--utme-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
     #timer { font-family: monospace; font-size: 22px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 5px; }
 
-    /* Main Layout */
     .container { display: flex; padding: 25px; gap: 25px; max-width: 1200px; margin: 0 auto; }
-    .question-area { flex: 3; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 400px; }
-    .navigation-area { flex: 1; background: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-self: flex-start; }
+    .question-area { flex: 3; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 300px; }
+    .navigation-area { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     
     .num-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 20px; }
-    .num-btn { padding: 12px 5px; border: 1px solid #dee2e6; cursor: pointer; background: #f8f9fa; border-radius: 4px; font-weight: 500; transition: all 0.2s; }
+    .num-btn { padding: 10px 2px; border: 1px solid #dee2e6; text-align:center; cursor: pointer; background: #f8f9fa; border-radius: 4px; font-size: 12px; }
     .num-btn.answered { background: var(--utme-green); color: white; border-color: var(--utme-green); }
-    .num-btn.active { border: 2px solid var(--utme-blue); color: var(--utme-blue); background: #e6f0ff; }
+    .num-btn.active { border: 2px solid var(--utme-blue); color: var(--utme-blue); }
     
     .btn-group { margin-top: 30px; display: flex; gap: 10px; }
-    .btn-nav { padding: 12px 25px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .btn-next { background: var(--utme-blue); color: white; border: none; flex-grow: 1; }
-
-    .warning { color: #c53030; font-weight: bold; }
+    .btn-nav { padding: 12px 15px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: 600; flex: 1; }
+    .btn-next { background: var(--utme-blue); color: white; border: none; }
   </style>
 </head>
 <body>
 
   <div id="instructions">
     <div class="welcome-card">
-      <h1>D-MATHS DIAGNOSING EXAM</h1>
-      
+      <h1>D-MATHS EXAM</h1>
       <div class="exam-details">
-        <div class="detail-item">
-          <span class="detail-label">Questions</span>
-          <span class="detail-value">40 Items</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Duration</span>
-          <span class="detail-value">40 Mins</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Subject</span>
-          <span class="detail-value">Physics</span>
-        </div>
+        <div class="detail-item"><span class="detail-label">Items</span><span class="detail-value">40</span></div>
+        <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">40m</span></div>
+        <div class="detail-item"><span class="detail-label">Subject</span><span class="detail-value">Physics</span></div>
       </div>
-
-      <ul class="instruction-list">
-        <li>1. Ensure you have a stable internet connection before starting.</li>
-        <li>2. Questions are shuffled from a bank of 100 specialized items.</li>
-        <li>3. Your results will be generated as a PDF upon completion.</li>
-      </ul>
-
       <div class="warning-box">
-        <span class="warning">ANTI-CHEAT SYSTEM ACTIVE:</span><br>
-        <small>Switching tabs, minimizing, or opening other apps more than <strong>5 times</strong> will trigger an immediate auto-submission of your script.</small>
+        <strong>SECURITY:</strong> Auto-submit after 5 tab switches.
       </div>
-
-      <button class="start-btn" onclick="startExam()">BEGIN EXAMINATION</button>
+      <button class="start-btn" onclick="startExam()">START TEST</button>
     </div>
   </div>
 
   <div class="header">
-    <div><strong>D-MATHS CBT PORTAL</strong></div>
+    <div><strong>D-MATHS CBT</strong></div>
     <div id="timer">40:00</div>
-    <button onclick="submitExam()" style="background: #c53030; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Final Submit</button>
+    <button onclick="submitExam()" style="background: #c53030; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Submit</button>
   </div>
 
   <div class="container">
     <div class="question-area" id="quiz-box">
-      <h3 id="q-text" style="color: #444; margin-top: 0;">Loading questions...</h3>
+      <h3 id="q-text" style="font-size: 18px;">Fetching Questions...</h3>
       <div id="options-list"></div>
-      
       <div class="btn-group">
-        <button class="btn-nav" onclick="prevQ()">Previous</button>
-        <button class="btn-nav btn-next" onclick="nextQ()">Save & Next</button>
+        <button class="btn-nav" onclick="prevQ()">Back</button>
+        <button class="btn-nav btn-next" onclick="nextQ()">Next</button>
       </div>
     </div>
 
     <div class="navigation-area">
-      <h4 style="margin-top:0; color: var(--utme-blue);">Question Navigator</h4>
+      <h4 style="margin:0; font-size: 14px;">Navigator</h4>
       <div id="num-grid" class="num-grid"></div>
-      <p style="font-size: 12px; color: #777; margin-top: 20px;">Green = Answered | Blue = Current</p>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    // ... (Everything below remains exactly the same as your logic)
     let questions = [];
     let currentIdx = 0;
     let userAnswers = {};
     let tabViolations = 0;
     let timeLeft = 40 * 60;
 
-    function startExam() {
+    // IMPORTANT: REPLACE THE URL BELOW WITH YOUR DEPLOYED WEB APP URL
+    const WEB_APP_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+
+    async function startExam() {
       document.getElementById('instructions').style.display = 'none';
-      google.script.run.withSuccessHandler(data => {
-        questions = data;
+      try {
+        const response = await fetch(WEB_APP_URL + "?getQuestions=true");
+        questions = await response.json();
         renderQuestion();
         renderGrid();
         startTimer();
-      }).getQuestions();
+      } catch (e) {
+        alert("Error loading questions. Ensure you pasted the correct Web App URL in the code.");
+        console.error(e);
+      }
     }
 
+    // Security and Navigation logic remains exactly the same
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         tabViolations++;
-        alert(`Security Warning! Do not leave this tab. Violations: ${tabViolations}/5`);
+        alert(`Warning! Violations: ${tabViolations}/5`);
         if (tabViolations >= 5) submitExam();
       }
     });
 
     function renderQuestion() {
-      if(questions.length === 0) return;
+      if(!questions[currentIdx]) return;
       const q = questions[currentIdx];
-      document.getElementById('q-text').innerText = `Question ${currentIdx + 1}: ${q.question}`;
+      document.getElementById('q-text').innerText = `Q${currentIdx + 1}: ${q.question}`;
       let html = "";
       q.options.forEach((opt, i) => {
         const letter = String.fromCharCode(65 + i);
         const checked = userAnswers[currentIdx] === letter ? 'checked' : '';
-        html += `<div style="margin-bottom: 15px; padding: 10px; border: 1px solid #eee; border-radius: 6px;">
-                  <label style="cursor: pointer; display: block;">
+        html += `<div style="margin-bottom: 10px; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fafafa">
+                  <label style="display: block; cursor: pointer;">
                     <input type="radio" name="opt" value="${letter}" ${checked} onchange="saveAnswer('${letter}')"> 
-                    <span style="margin-left: 10px;"><strong>${letter}.</strong> ${opt}</span>
+                    <strong>${letter}.</strong> ${opt}
                   </label>
                 </div>`;
       });
       document.getElementById('options-list').innerHTML = html;
     }
 
-    function saveAnswer(val) {
-      userAnswers[currentIdx] = val;
-      renderGrid();
-    }
-
+    function saveAnswer(val) { userAnswers[currentIdx] = val; renderGrid(); }
     function renderGrid() {
       let html = "";
       questions.forEach((_, i) => {
@@ -215,11 +169,8 @@
     function prevQ() { if(currentIdx > 0) goToQ(currentIdx - 1); }
 
     function startTimer() {
-      const timerInterval = setInterval(() => {
-        if (timeLeft <= 0) {
-           clearInterval(timerInterval);
-           submitExam();
-        }
+      const interval = setInterval(() => {
+        if (timeLeft <= 0) { clearInterval(interval); submitExam(); }
         timeLeft--;
         let mins = Math.floor(timeLeft / 60);
         let secs = timeLeft % 60;
@@ -229,26 +180,17 @@
 
     function submitExam() {
       let score = 0;
-      questions.forEach((q, i) => {
-        if (userAnswers[i] === q.answer) score++;
-      });
+      questions.forEach((q, i) => { if (userAnswers[i] === q.answer) score++; });
       generatePDF(score);
-      alert("Exam Submitted! Your result is downloading.");
+      alert("Submitted!");
       window.location.reload();
     }
 
     function generatePDF(score) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      doc.setFontSize(22);
-      doc.text("D-MATHS DIAGONISING EXAM", 20, 30);
-      doc.setFontSize(16);
-      doc.text("Official Performance Report", 20, 45);
-      doc.line(20, 50, 190, 50);
-      doc.text(`Total Score: ${score} / 40`, 20, 70);
-      doc.text(`Percentage: ${(score/40)*100}%`, 20, 85);
-      doc.setFontSize(10);
-      doc.text("Generated by D-MATHS CBT System", 20, 120);
+      doc.text("D-MATHS DIAGNOSING EXAM RESULT", 20, 20);
+      doc.text(`Score: ${score} / 40`, 20, 40);
       doc.save("D-MATHS-Result.pdf");
     }
   </script>
