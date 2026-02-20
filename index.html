@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root { --utme-blue: #003366; --utme-green: #2e7d32; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; margin: 0; user-select: none; }
+    /* Header & Timer */
+    .header { background: var(--utme-blue); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
+    /* Main Layout */
+    .container { display: flex; padding: 20px; gap: 20px; }
+    .question-area { flex: 3; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .navigation-area { flex: 1; background: white; padding: 20px; border-radius: 8px; text-align: center; }
+    .num-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 15px; }
+    .num-btn { padding: 10px; border: 1px solid #ccc; cursor: pointer; background: #eee; }
+    .num-btn.answered { background: var(--utme-green); color: white; }
+    .num-btn.active { border: 2px solid black; font-weight: bold; }
+    /* Security Overlay */
+    #instructions { position: fixed; inset: 0; background: white; z-index: 1000; padding: 50px; text-align: center; }
+    .warning { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div id="instructions">
+    <h1>D-MATHS DIAGNOSING EXAM</h1>
+    <p><strong>Instructions:</strong> 40 Questions | 40 Minutes</p>
+    <p class="warning">Warning: Changing tabs or minimizing the window more than 5 times will result in AUTO-SUBMISSION.</p>
+    <button onclick="startExam()" style="padding: 15px 40px; background: var(--utme-blue); color: white; border: none; cursor: pointer;">START EXAM</button>
+  </div>
+
+  <div class="header">
+    <div><strong>D-MATHS CBT</strong></div>
+    <div id="timer">40:00</div>
+    <button onclick="submitExam()" style="background: red; color: white; border: none; padding: 5px 15px; cursor: pointer;">Submit</button>
+  </div>
+
+  <div class="container">
+    <div class="question-area" id="quiz-box">
+      <h3 id="q-text">Loading questions...</h3>
+      <div id="options-list"></div>
+      <br>
+      <button onclick="prevQ()">Previous</button>
+      <button onclick="nextQ()">Next</button>
+    </div>
+
+    <div class="navigation-area">
+      <h4>Questions Navigator</h4>
+      <div id="num-grid" class="num-grid"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    let questions = [];
+    let currentIdx = 0;
+    let userAnswers = {};
+    let tabViolations = 0;
+    let timeLeft = 40 * 60;
+
+    function startExam() {
+      document.getElementById('instructions').style.display = 'none';
+      google.script.run.withSuccessHandler(data => {
+        questions = data;
+        renderQuestion();
+        renderGrid();
+        startTimer();
+      }).getQuestions();
+    }
+
+    // SECURITY: Tab Change Detection
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        tabViolations++;
+        alert(`Security Warning! Do not leave this tab. Violations: ${tabViolations}/5`);
+        if (tabViolations >= 5) submitExam();
+      }
+    });
+
+    function renderQuestion() {
+      const q = questions[currentIdx];
+      document.getElementById('q-text').innerText = `Q${currentIdx + 1}. ${q.question}`;
+      let html = "";
+      q.options.forEach((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        const checked = userAnswers[currentIdx] === letter ? 'checked' : '';
+        html += `<p><input type="radio" name="opt" value="${letter}" ${checked} onchange="saveAnswer('${letter}')"> ${letter}. ${opt}</p>`;
+      });
+      document.getElementById('options-list').innerHTML = html;
+    }
+
+    function saveAnswer(val) {
+      userAnswers[currentIdx] = val;
+      renderGrid();
+    }
+
+    function renderGrid() {
+      let html = "";
+      questions.forEach((_, i) => {
+        let status = userAnswers[i] ? 'answered' : '';
+        let active = currentIdx === i ? 'active' : '';
+        html += `<div class="num-btn ${status} ${active}" onclick="goToQ(${i})">${i + 1}</div>`;
+      });
+      document.getElementById('num-grid').innerHTML = html;
+    }
+
+    function goToQ(i) { currentIdx = i; renderQuestion(); renderGrid(); }
+    function nextQ() { if(currentIdx < 39) goToQ(currentIdx + 1); }
+    function prevQ() { if(currentIdx > 0) goToQ(currentIdx - 1); }
+
+    function startTimer() {
+      setInterval(() => {
+        if (timeLeft <= 0) submitExam();
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }, 1000);
+    }
+
+    function submitExam() {
+      let score = 0;
+      questions.forEach((q, i) => {
+        if (userAnswers[i] === q.answer) score++;
+      });
+      generatePDF(score);
+      alert("Exam Submitted Successfully!");
+      window.location.reload();
+    }
+
+    function generatePDF(score) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("D-MATHS DIAGONISING EXAM - RESULT", 20, 20);
+      doc.text(`Total Score: ${score} / 40`, 20, 40);
+      doc.text(`Percentage: ${(score/40)*100}%`, 20, 50);
+      doc.save("D-MATHS-Result.pdf");
+    }
+  </script>
+</body>
+</html>
