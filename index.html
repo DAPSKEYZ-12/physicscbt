@@ -110,7 +110,7 @@
     let timeLeft = 40 * 60;
 
     // IMPORTANT: REPLACE THE URL BELOW WITH YOUR DEPLOYED WEB APP URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby8uLfYKpjKWQ3k_vfcrl0dz66EUmpN553ZY1qvjF5C3xBhhJpqUD1bQzbLKkFvRU4v/exec";
+    const WEB_APP_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
 
     async function startExam() {
       document.getElementById('instructions').style.display = 'none';
@@ -193,6 +193,26 @@
       doc.text(`Score: ${score} / 40`, 20, 40);
       doc.save("D-MATHS-Result.pdf");
     }
+
+    async function submitExam() {
+  let score = 0;
+  questions.forEach((q, i) => {
+    if (userAnswers[i] === q.answer) score++;
+  });
+
+  // 1. Send score to Google Sheet
+  try {
+    await fetch(WEB_APP_URL + "?score=" + score);
+  } catch (e) {
+    console.log("Could not record score to sheet, but downloading PDF anyway.");
+  }
+
+  // 2. Download the Result PDF
+  generatePDF(score);
+
+  alert("Exam Submitted Successfully! Your result is downloading.");
+  window.location.reload();
+}
   </script>
 </body>
 </html>
